@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: test_cases
+title: 跨平台UI自动化测试用例
+scope:
+    - testcases/
+source_files: []
+depends_on: []
+related_to:
+    - path: page_objects

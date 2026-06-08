@@ -1,0 +1,41 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+reports/
+logs/
+allure-results/
+*.html
+
+# Airtest
+*.air/_tmp/
+airtest_log/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test screenshots (keep structure but ignore content)
+screenshots/*.png
+
+# Secrets
+config/local_config.yaml

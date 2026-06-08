@@ -1,0 +1,69 @@
+# ============================================
+# AirTestUI 全局配置文件
+# ============================================
+
+# 当前运行环境: dev / staging / production
+env: staging
+
+# 超时配置（秒）
+timeout:
+  element_wait: 10        # 元素等待超时
+  page_load: 30           # 页面加载超时
+  app_launch: 60          # APP启动超时
+
+# 截图配置
+screenshot:
+  on_failure: true        # 失败时自动截图
+  on_step: false          # 每步操作截图（调试用，默认关闭）
+  save_dir: screenshots   # 截图保存目录
+
+# 重试配置
+retry:
+  max_attempts: 2         # 失败重试次数
+  wait_between: 3         # 重试间隔（秒）
+
+# 报告配置
+report:
+  allure_dir: allure-results
+  html_file: reports/report.html
+
+# 通知配置（按需启用）
+notification:
+  enabled: false
+  type: dingtalk          # dingtalk / email
+  dingtalk:
+    webhook: ""
+    secret: ""
+  email:
+    smtp_host: ""
+    smtp_port: 465
+    sender: ""
+    password: ""
+    receivers: []
+
+# ============================================
+# Android 设备与APP配置
+# ============================================
+android:
+  devices:
+    - serial: "127.0.0.1:62001"     # 设备序列号（真机/模拟器）
+      name: "emulator-1"             # 设备别名（用于报告中标识）
+    # - serial: "device_serial_2"
+    #   name: "pixel-6"
+  app:
+    package: "com.example.app"       # APP包名
+    activity: ".MainActivity"        # 启动Activity
+    install_path: ""                 # APK安装路径（可选，留空则不自动安装）
+
+# ============================================
+# iOS 设备与APP配置
+# ============================================
+ios:
+  devices:
+    - uuid: "auto"                   # 设备UUID，auto表示自动检测
+      name: "iPhone-14"              # 设备别名
+    # - uuid: "device_uuid_2"
+    #   name: "iPhone-15"
+  app:
+    bundle_id: "com.example.app"     # Bundle ID
+    install_path: ""                 # IPA安装路径（可选）

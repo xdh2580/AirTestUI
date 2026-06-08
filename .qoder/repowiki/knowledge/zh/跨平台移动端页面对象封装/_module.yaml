@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: page_objects
+title: 跨平台移动端页面对象封装
+scope:
+    - pages/
+source_files: []
+depends_on: []
+related_to:
+    - path: test_cases
+    - path: base_framework

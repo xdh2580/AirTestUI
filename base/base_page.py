@@ -1,0 +1,319 @@
+"""
+Page Object 基类
+封装 airtest / poco 核心操作，提供统一的页面对象交互接口
+支持图像识别 + UI 树定位双模式
+"""
+import time
+import allure
+
+from airtest.core.api import (
+    touch,
+    swipe,
+    wait,
+    exists,
+    assert_exists,
+    assert_not_exists,
+    sleep,
+    snapshot,
+)
+from airtest.core.assertions import assert_equal, assert_not_equal
+from airtest.core.helper import G
+from poco.proxy import UIObjectProxy
+
+from config.settings import get_timeout, settings, ROOT_DIR
+from utils.logger import get_logger
+from utils.screenshot import take_screenshot, attach_screenshot_to_allure
+
+log = get_logger("BasePage")
+
+
+class BasePage:
+    """
+    Page Object 基类
+
+    所有页面对象应继承此类，通过封装后的方法进行 UI 操作。
+    内置智能等待、自动截图、操作日志、Allure 步骤记录。
+
+    用法:
+        class LoginPage(BasePage):
+            def __init__(self):
+                super().__init__()
+                self.btn_login = Template("resources/android/btn_login.png")
+
+            def login(self, username, password):
+                self.input_text(username, self.input_username)
+                self.input_text(password, self.input_password)
+                self.click(self.btn_login)
+    """
+
+    def __init__(self, poco=None):
+        """
+        Args:
+            poco: Poco 实例，用于 UI 树定位。为空则仅使用图像识别模式
+        """
+        self._poco = poco
+        self._timeout = get_timeout("element_wait")
+        self._page_load_timeout = get_timeout("page_load")
+
+    # ==================== 图像识别操作 ====================
+
+    @allure.step("点击元素: {target}")
+    def click(self, target, **kwargs):
+        """
+        点击目标（图像识别）
+
+        Args:
+            target: airtest Template 对象 或 坐标元组
+        """
+        log.info(f"点击: {target}")
+        try:
+            touch(target, **kwargs)
+        except Exception as e:
+            log.error(f"点击失败: {target}, 错误: {e}")
+            take_screenshot(f"click_fail_{target}")
+            raise
+
+    @allure.step("等待元素出现: {target}")
+    def wait_for_element(self, target, timeout=None, interval=0.5):
+        """
+        等待元素出现
+
+        Args:
+            target: Template 对象
+            timeout: 超时时间（秒），默认使用全局配置
+            interval: 检查间隔
+
+        Returns:
+            元素坐标
+        """
+        timeout = timeout or self._timeout
+        log.info(f"等待元素: {target}, 超时: {timeout}s")
+        try:
+            pos = wait(target, timeout=timeout, interval=interval)
+            return pos
+        except Exception as e:
+            log.error(f"等待元素超时: {target}")
+            take_screenshot(f"wait_timeout_{target}")
+            raise
+
+    @allure.step("判断元素是否存在: {target}")
+    def is_exists(self, target) -> bool:
+        """
+        判断元素是否存在（不抛异常）
+
+        Args:
+            target: Template 对象
+
+        Returns:
+            bool
+        """
+        return exists(target)
+
+    @allure.step("断言元素存在: {target}")
+    def assert_element_exists(self, target, msg=""):
+        """断言元素存在"""
+        log.info(f"断言元素存在: {target}")
+        try:
+            assert_exists(target, msg or f"元素应存在: {target}")
+        except AssertionError:
+            take_screenshot(f"assert_exists_fail_{target}")
+            raise
+
+    @allure.step("断言元素不存在: {target}")
+    def assert_element_not_exists(self, target, msg=""):
+        """断言元素不存在"""
+        log.info(f"断言元素不存在: {target}")
+        assert_not_exists(target, msg or f"元素不应存在: {target}")
+
+    @allure.step("滑动: {direction}")
+    def swipe_screen(self, direction: str = "up", duration=0.5):
+        """
+        屏幕滑动
+
+        Args:
+            direction: 滑动方向 up/down/left/right
+            duration: 滑动持续时间
+        """
+        log.info(f"滑动: {direction}")
+
+        # 获取屏幕尺寸
+        device = G.DEVICE
+        if device:
+            w, h = device.get_current_resolution()
+        else:
+            w, h = 1080, 1920
+
+        cx, cy = w // 2, h // 2
+        offset = min(w, h) // 3
+
+        directions = {
+            "up": (cx, cy + offset, cx, cy - offset),
+            "down": (cx, cy - offset, cx, cy + offset),
+            "left": (cx + offset, cy, cx - offset, cy),
+            "right": (cx - offset, cy, cx + offset, cy),
+        }
+
+        if direction not in directions:
+            raise ValueError(f"不支持的滑动方向: {direction}")
+
+        start_x, start_y, end_x, end_y = directions[direction]
+        swipe((start_x, start_y), (end_x, end_y), duration=duration)
+
+    @allure.step("输入文本: {text}")
+    def input_text(self, text: str, target=None, enter=False):
+        """
+        输入文本
+
+        Args:
+            text: 要输入的文本
+            target: 目标元素，为空则直接输入到当前焦点
+            enter: 输入后是否按回车
+        """
+        log.info(f"输入文本: {text}")
+        if target:
+            touch(target)
+            sleep(0.5)
+
+        from airtest.core.api import text as airtest_text
+        airtest_text(text)
+
+        if enter:
+            from airtest.core.api import keyevent
+            keyevent("ENTER")
+
+    # ==================== Poco UI树操作 ====================
+
+    def poco(self):
+        """获取 Poco 实例"""
+        if self._poco is None:
+            raise RuntimeError("Poco 未初始化，请在构造函数中传入 poco 实例")
+        return self._poco
+
+    @allure.step("Poco点击: {name}")
+    def poco_click(self, name_or_proxy, timeout=None):
+        """
+        通过 Poco 点击元素（UI树定位）
+
+        Args:
+            name_or_proxy: Poco UIObjectProxy 或 节点名
+            timeout: 等待超时
+        """
+        timeout = timeout or self._timeout
+        element = self._resolve_poco_element(name_or_proxy, timeout)
+        log.info(f"Poco点击: {name_or_proxy}")
+        element.click()
+
+    @allure.step("Poco输入文本: {text}")
+    def poco_set_text(self, name_or_proxy, text: str, timeout=None):
+        """
+        通过 Poco 设置文本
+
+        Args:
+            name_or_proxy: Poco 元素或节点名
+            text: 要设置的文本
+            timeout: 等待超时
+        """
+        timeout = timeout or self._timeout
+        element = self._resolve_poco_element(name_or_proxy, timeout)
+        log.info(f"Poco输入: {name_or_proxy} -> {text}")
+        element.set_text(text)
+
+    @allure.step("Poco获取文本")
+    def poco_get_text(self, name_or_proxy, timeout=None) -> str:
+        """获取元素的文本属性"""
+        timeout = timeout or self._timeout
+        element = self._resolve_poco_element(name_or_proxy, timeout)
+        return element.get_text()
+
+    @allure.step("Poco等待元素: {name_or_proxy}")
+    def poco_wait_for_element(self, name_or_proxy, timeout=None) -> UIObjectProxy:
+        """等待 Poco 元素出现"""
+        timeout = timeout or self._timeout
+        return self._resolve_poco_element(name_or_proxy, timeout)
+
+    @allure.step("Poco断言元素存在: {name_or_proxy}")
+    def poco_assert_exists(self, name_or_proxy, msg="", timeout=None):
+        """断言 Poco 元素存在"""
+        timeout = timeout or self._timeout
+        try:
+            element = self._resolve_poco_element(name_or_proxy, timeout)
+            assert element.exists(), msg or f"Poco元素应存在: {name_or_proxy}"
+        except (AssertionError, Exception) as e:
+            take_screenshot(f"poco_assert_exists_fail")
+            raise
+
+    @allure.step("Poco断言文本: {expected}")
+    def poco_assert_text(self, name_or_proxy, expected: str, timeout=None):
+        """断言 Poco 元素的文本内容"""
+        timeout = timeout or self._timeout
+        element = self._resolve_poco_element(name_or_proxy, timeout)
+        actual = element.get_text()
+        log.info(f"Poco断言文本: 期望='{expected}', 实际='{actual}'")
+        assert_equal(actual, expected, f"文本断言: {name_or_proxy}")
+
+    # ==================== 通用断言 ====================
+
+    @allure.step("断言相等")
+    def assert_equal(self, actual, expected, msg=""):
+        assert_equal(actual, expected, msg or f"期望 {expected}, 实际 {actual}")
+
+    @allure.step("断言不相等")
+    def assert_not_equal(self, actual, expected, msg=""):
+        assert_not_equal(actual, expected, msg or f"不应等于 {expected}")
+
+    @allure.step("断言为真: {msg}")
+    def assert_true(self, condition, msg=""):
+        assert condition, msg or f"条件应为 True"
+
+    @allure.step("断言包含")
+    def assert_contains(self, container, item, msg=""):
+        assert item in container, msg or f"{item} 应在 {container} 中"
+
+    # ==================== 工具方法 ====================
+
+    @allure.step("等待: {seconds}秒")
+    def wait_seconds(self, seconds: float = 1.0):
+        """显式等待"""
+        sleep(seconds)
+
+    @allure.step("截图")
+    def take_page_screenshot(self, name: str = "page"):
+        """截图当前页面"""
+        filepath = take_screenshot(name)
+        if filepath:
+            attach_screenshot_to_allure(name, filepath)
+        return filepath
+
+    def _resolve_poco_element(self, name_or_proxy, timeout=10) -> UIObjectProxy:
+        """
+        解析 Poco 元素
+
+        Args:
+            name_or_proxy: 字符串节点名 或 UIObjectProxy 实例
+            timeout: 等待超时
+
+        Returns:
+            UIObjectProxy 实例
+        """
+        if isinstance(name_or_proxy, UIObjectProxy):
+            return name_or_proxy
+
+        if isinstance(name_or_proxy, str):
+            element = self.poco()(name_or_proxy)
+            element.wait_for_appearance(timeout=timeout)
+            return element
+
+        raise TypeError(f"不支持的元素类型: {type(name_or_proxy)}")
+
+    @staticmethod
+    def resource_path(relative_path: str) -> str:
+        """
+        获取资源文件的绝对路径
+
+        Args:
+            relative_path: 相对于 resources/ 目录的路径
+
+        用法:
+            Template(BasePage.resource_path("android/btn_login.png"))
+        """
+        return str(ROOT_DIR / "resources" / relative_path)

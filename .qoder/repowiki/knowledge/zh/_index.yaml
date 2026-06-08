@@ -1,0 +1,97 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: zh-CN
+branch: Q0DeR-MaG1C-BrAnCh-Fo2-NoN-GiT-Or-No-C0MmIt
+exported_at: "2026-06-08T07:10:24Z"
+modules:
+    "":
+        dir_name: AirTestUI 企业级自动化测试框架
+        title: AirTestUI 企业级自动化测试框架
+        scope:
+            - .gitignore
+            - conftest.py
+            - pytest.ini
+            - requirements.txt
+            - .qoder\plans\AirTestUI_企业级自动化测试框架_6c791539.md
+            - base\__init__.py
+            - base\app_launcher.py
+            - base\base_page.py
+            - base\driver_manager.py
+            - config\__init__.py
+            - config\config.yaml
+            - config\settings.py
+            - data\test_data.yaml
+            - pages\__init__.py
+            - pages\android\__init__.py
+            - pages\android\home_page.py
+            - pages\android\login_page.py
+            - pages\ios\__init__.py
+            - pages\ios\home_page.py
+            - pages\ios\login_page.py
+            - testcases\__init__.py
+            - testcases\android\__init__.py
+            - testcases\android\test_home.py
+            - testcases\android\test_login.py
+            - testcases\ios\__init__.py
+            - testcases\ios\test_home.py
+            - testcases\ios\test_login.py
+            - utils\__init__.py
+            - utils\data_loader.py
+            - utils\logger.py
+            - utils\notification.py
+            - utils\retry.py
+            - utils\screenshot.py
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    base_framework:
+        dir_name: UI自动化测试基础框架
+        title: UI自动化测试基础框架
+        scope:
+            - base/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: page_objects
+    config:
+        dir_name: 配置管理与测试数据加载
+        title: 配置管理与测试数据加载
+        scope:
+            - config/
+            - data/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    page_objects:
+        dir_name: 跨平台移动端页面对象封装
+        title: 跨平台移动端页面对象封装
+        scope:
+            - pages/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: test_cases
+            - path: base_framework
+    test_cases:
+        dir_name: 跨平台UI自动化测试用例
+        title: 跨平台UI自动化测试用例
+        scope:
+            - testcases/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to:
+            - path: page_objects
+    utilities:
+        dir_name: 自动化测试通用工具模块
+        title: 自动化测试通用工具模块
+        scope:
+            - utils/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
