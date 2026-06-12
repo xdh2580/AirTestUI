@@ -46,13 +46,13 @@ notification:
 # ============================================
 android:
   devices:
-    - serial: "127.0.0.1:62001"     # 设备序列号（真机/模拟器）
-      name: "emulator-1"             # 设备别名（用于报告中标识）
+    - serial: "10AEBN2KRG001KP"     # 设备序列号（真机/模拟器）
+      name: "My Android Device"             # 设备别名（用于报告中标识）
     # - serial: "device_serial_2"
     #   name: "pixel-6"
   app:
-    package: "com.example.app"       # APP包名
-    activity: ".MainActivity"        # 启动Activity
+    package: "com.unionpay"       # APP包名
+    activity: ".activity.UPActivityMain"        # 启动Activity
     install_path: ""                 # APK安装路径（可选，留空则不自动安装）
 
 # ============================================

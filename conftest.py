@@ -57,6 +57,8 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.android)
         elif "ios" in str(item.fspath):
             item.add_marker(pytest.mark.ios)
+        elif "common" in str(item.fspath):
+            item.add_marker(pytest.mark.common)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -227,6 +229,41 @@ def setup_app(app_launcher, device_info):
     log.info(f"===== 测试会话结束 [{device_info.name}] =====")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def navigate_to_target_page(setup_app):
+    """
+    APP 启动后，自动导航到目标页面
+    只执行一次（session 级别），所有用例共享这个前置状态
+
+    修改下方代码：点击你需要的按钮进入目标页面
+    """
+    log.info("--- 前置导航: 进入目标页面 ---")
+
+    # ========== 在这里写你的前置操作 ==========
+    from airtest.core.api import Template, touch, wait, sleep
+
+    # 示例：等待首页加载后，点击某个按钮进入目标页面
+    # 方式1 - 图像识别点击
+    btn_target = Template("resources/common/申请信用卡.png", threshold=0.7)
+    wait(btn_target, timeout=15)
+    touch(btn_target)
+
+    # 方式2 - 坐标点击（如果你知道按钮的坐标）
+    # touch((540, 1200))
+
+    # 方式3 - Poco 点击（如果你知道节点名）
+    # from poco.drivers.android.uiautomation import AndroidUiautomationPoco
+    # poco = AndroidUiautomationPoco()
+    # poco("你的按钮节点名").click()
+
+    sleep(3)  # 等待页面跳转完成
+    log.info("--- 前置导航完成 ---")
+
+    yield
+    # yield 之后是后置步骤（所有用例跑完后执行）
+    log.info("--- 测试会话后置 ---")
+
+
 @pytest.fixture(autouse=True)
 def step_allure(request):
     """每个测试用例自动记录为 Allure 步骤"""
@@ -252,3 +289,23 @@ def test_data():
         return load_yaml(filepath)
 
     return _load
+
+
+def pytest_unconfigure(config):
+    """pytest 退出时清理 airtest 后台线程，抑制 Logging error"""
+    import logging
+
+    # 1. 抑制 airtest 退出时的日志报错（线程写已关闭的文件句柄）
+    airtest_logger = logging.getLogger("airtest")
+    airtest_logger.setLevel(logging.CRITICAL + 1)  # 屏蔽所有日志
+
+    # 2. 提前清理 adb 端口转发
+    try:
+        from airtest.core.android import adb as adb_module
+        for device in adb_module.adb.devices():
+            try:
+                adb_module.adb._cleanup_forwards()
+            except Exception:
+                pass
+    except Exception:
+        pass

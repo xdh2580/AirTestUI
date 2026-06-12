@@ -59,7 +59,11 @@ class AppLauncher:
 
             log.info(f"启动 APP: {self.package}")
             if self.platform == "android" and self.activity:
-                start_app(self.package, self.activity)
+                # airtest start_app 会拼接 {package}/{package}.{activity}
+                # 如果 activity 以 "." 开头（Android 相对路径规范），
+                # 拼接后会产生双点号，需要去掉前导点
+                activity = self.activity.lstrip(".")
+                start_app(self.package, activity)
             else:
                 start_app(self.package)
 

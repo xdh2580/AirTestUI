@@ -3,11 +3,20 @@
 基于 loguru 实现结构化日志，支持文件轮转和多级别输出
 """
 import sys
+import os
 from pathlib import Path
 from loguru import logger
 
 from config.settings import ROOT_DIR
 
+
+# 修复 Windows 控制台中文编码问题
+if sys.platform == "win32":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+    try:
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 # 日志目录
 LOG_DIR = ROOT_DIR / "logs"
