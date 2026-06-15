@@ -28,7 +28,7 @@ def _merge_env_override(config: dict) -> dict:
         if key.startswith(prefix):
             config_key = key[len(prefix):].lower()
             config[config_key] = value
-    return config
+    return config 
 
 
 # 加载主配置

@@ -39,3 +39,6 @@ screenshots/*.png
 
 # Secrets
 config/local_config.yaml
+
+#TEMP
+TEMP/

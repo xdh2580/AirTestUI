@@ -137,11 +137,7 @@ class BasePage:
         log.info(f"滑动: {direction}")
 
         # 获取屏幕尺寸
-        device = G.DEVICE
-        if device:
-            w, h = device.get_current_resolution()
-        else:
-            w, h = 1080, 1920
+        w, h = self._get_screen_size()
 
         cx, cy = w // 2, h // 2
         offset = min(w, h) // 3
@@ -158,6 +154,26 @@ class BasePage:
 
         start_x, start_y, end_x, end_y = directions[direction]
         swipe((start_x, start_y), (end_x, end_y), duration=duration)
+
+    @allure.step("点击相对坐标")
+    def click_by_ratio(self, rx: float, ry: float):
+        """
+        按页面相对坐标点击
+
+        Args:
+            rx: 水平相对位置 (0.0~1.0, 0.0=左边缘, 1.0=右边缘)
+            ry: 垂直相对位置 (0.0~1.0, 0.0=顶部, 1.0=底部)
+
+        用法:
+            self.click_by_ratio(0.5, 0.3)   # 屏幕水平居中、上方30%处点击
+            self.click_by_ratio(0.85, 0.92) # 右下角附近点击
+        """
+        w, h = self._get_screen_size()
+        x, y = int(w * rx), int(h * ry)
+        log.info(f"点击相对坐标: ({rx:.2f}, {ry:.2f}) -> 像素 ({x}, {y}) / ({w}x{h})")
+        allure.attach(f"相对坐标: x={rx:.3f}, y={ry:.3f} | 像素: ({x}, {y}) | 屏幕: {w}x{h}",
+                      name="坐标详情", attachment_type=allure.attachment_type.TEXT)
+        touch((x, y))
 
     @allure.step("输入文本: {text}")
     def input_text(self, text: str, target=None, enter=False):
@@ -270,6 +286,13 @@ class BasePage:
         assert item in container, msg or f"{item} 应在 {container} 中"
 
     # ==================== 工具方法 ====================
+
+    def _get_screen_size(self):
+        """获取当前设备屏幕分辨率 (宽, 高)"""
+        device = G.DEVICE
+        if device:
+            return device.get_current_resolution()
+        return 1080, 1920
 
     @allure.step("等待: {seconds}秒")
     def wait_seconds(self, seconds: float = 1.0):
