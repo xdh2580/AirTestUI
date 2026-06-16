@@ -294,6 +294,24 @@ class BasePage:
             return device.get_current_resolution()
         return 1080, 1920
 
+    @allure.step("重新进入小程序首页")
+    def reload_miniapp(self):
+        """
+        通过小程序菜单「重新进入」回到小程序首页。
+        适用于任何页面需要回到首页的场景。
+        """
+        from airtest.core.api import Template, touch, wait
+        log.info("通过小程序菜单重新进入首页")
+        btn_menu = Template(
+            self.resource_path("common/小程序菜单.png"))
+        wait(btn_menu, timeout=15)
+        touch(btn_menu)
+        btn_reload = Template(
+            self.resource_path("common/重新进入.png"))
+        wait(btn_reload, timeout=15)
+        touch(btn_reload)
+        self.wait_seconds(3)
+
     @allure.step("等待: {seconds}秒")
     def wait_seconds(self, seconds: float = 1.0):
         """显式等待"""

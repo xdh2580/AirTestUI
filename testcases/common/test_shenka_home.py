@@ -113,7 +113,7 @@ class TestShenkaHome:
         SKHG-HOME-05: 权益详情展开
         缺少图片：shenka_home_rights_btn.png、shenka_home_rights_detail.png
         """
-        self.page.navigate_to_home()
+        self.page.reload_miniapp()
         self.page.wait_seconds(5)
         # 1. 点击权益文案按钮
         self.page.click_rights_btn()
@@ -131,7 +131,7 @@ class TestShenkaHome:
         SKHG-HOME-06: 申卡有礼活动展开
         缺少图片：shenka_home_activity_btn.png、shenka_home_activity_detail.png
         """
-        self.page.navigate_to_home()
+        self.page.reload_miniapp()
         self.page.wait_seconds(5)
         # 1. 点击申卡活动文案
         self.page.click_activity_btn()

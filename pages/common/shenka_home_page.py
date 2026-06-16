@@ -84,30 +84,9 @@ class ShenkaHomePage(BasePage):
         # self.apply_entry_in_yunshansfu = Template(
         #     self.resource_path(f"{RES}/yunshan_apply_entry.png"))
 
-    # ---- 页面导航 ----
-
-    @allure.step("导航到申卡首页")
-    def navigate_to_home(self):
-        """
-        导航到申卡首页
-        如果当前已在首页则直接返回，否则通过点击入口重新进入
-        """
-        from airtest.core.api import Template, touch, wait
-        log.info("导航到申卡首页")
-        # if self.is_home_loaded():
-        #     log.info("已在申卡首页，无需重新导航")
-        #     return True
-        # 点击重新进入（刷新）申卡首页
-        btn_menu = Template(
-            self.resource_path("common/小程序菜单.png"))
-        wait(btn_menu, timeout=15)
-        touch(btn_menu)
-        btn_reload = Template(
-            self.resource_path("common/重新进入.png"))
-        wait(btn_reload, timeout=15)
-        touch(btn_reload)
-        self.wait_seconds(3)
-        return self.is_home_loaded()
+        # 选择城市入口
+        self.select_city_entry = Template(
+            self.resource_path(f"{RES}/shenka_home_select_city_entry.png"))
 
     # ---- 页面验证 ----
 
@@ -234,3 +213,10 @@ class ShenkaHomePage(BasePage):
         log.info("确认申请授权")
         self.wait_for_element(self.btn_apply_confirm)
         self.click(self.btn_apply_confirm)
+
+    @allure.step("点击城市选择")
+    def click_select_city_entry(self):
+        """点击城市选择入口"""
+        log.info("点击城市选择入口")
+        self.wait_for_element(self.select_city_entry)
+        self.click(self.select_city_entry)
