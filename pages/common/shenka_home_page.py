@@ -88,13 +88,12 @@ class ShenkaHomePage(BasePage):
         self.select_city_entry = Template(
             self.resource_path(f"{RES}/shenka_home_select_city_entry.png"))
 
-    # ---- 页面验证 ----
+        # 搜索入口
+        self.search_entry = Template(
+            self.resource_path(f"{RES}/shenka_home_search_entry.png"))
+            
 
-    @allure.step("等待申卡首页加载")
-    def wait_home_loaded(self, timeout=15):
-        """等待申卡首页加载完成（等待推荐Tab出现）"""
-        log.info("等待申卡首页加载")
-        return self.wait_for_element(self.home_recommend_tab, timeout=timeout)
+    # ---- 页面验证 ----
 
     @allure.step("判断申卡首页是否已加载")
     def is_home_loaded(self) -> bool:
@@ -220,3 +219,10 @@ class ShenkaHomePage(BasePage):
         log.info("点击城市选择入口")
         self.wait_for_element(self.select_city_entry)
         self.click(self.select_city_entry)
+
+    @allure.step("点击搜索入口")
+    def click_search_entry(self):
+        """点击搜索入口"""
+        log.info("点击搜索入口")
+        self.wait_for_element(self.search_entry)
+        self.click(self.search_entry)

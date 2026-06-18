@@ -56,6 +56,12 @@ class ShenkaFilterPage(BasePage):
             threshold=0.8,
         )
 
+        self.filter_all_card_page_indicator = Template(
+            self.resource_path(f"{RES}/shenka_filter_all_card_page_indicator.png"))
+
+        self.filter_all_card_page_indicator2 = Template(
+            self.resource_path(f"{RES}/shenka_filter_all_card_page_indicator2.png"))
+
         # ---------- 待补充图片资源（TODO_IMG）----------
         # 全部/默认筛选Tab
         # self.filter_all_tab = Template(
@@ -106,6 +112,12 @@ class ShenkaFilterPage(BasePage):
         #     self.resource_path(f"{RES}/shenka_filter_special_tag.png"), threshold=0.8)
 
     # ---- 页面验证 ----
+    @allure.step("判断是否在所有卡片的筛选页面")
+    def is_filter_all_card_page_displayed(self) -> bool:
+        """
+        判断是否在"所有卡片"的筛选页面
+        """
+        return self.is_exists(self.filter_all_card_page_indicator) and self.is_exists(self.filter_all_card_page_indicator2)
 
     @allure.step("判断筛选结果是否已刷新")
     def is_filter_result_refreshed(self) -> bool:

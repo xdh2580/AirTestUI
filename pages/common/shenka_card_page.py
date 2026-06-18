@@ -52,6 +52,10 @@ class ShenkaCardPage(BasePage):
         super().__init__(poco=None)
 
         # ---------- 已有图片资源 ----------
+        # 卡片申请页面加载标志
+        self.card_apply_page_indicator = Template(
+            self.resource_path(f"{RES}/shenka_card_apply_page_indicator.png"), threshold=0.8)
+          
         # 卡片详情页面加载标志（等待）
         self.card_detail_page = Template(
             self.resource_path(f"{RES}/shenka_card_detail_page.png"),
@@ -177,6 +181,11 @@ class ShenkaCardPage(BasePage):
         #     self.resource_path(f"{RES}/shenka_card_all_cards_page.png"), threshold=0.8)
 
     # ---- 页面验证 ----
+    def is_card_apply_page_displayed(self) -> bool:
+        """
+        验证卡片申请页面是否已显示（通过申请页面标志判断）
+        """
+        return self.is_exists(self.card_apply_page_indicator)
 
     @allure.step("等待卡片详情页加载")
     def wait_card_detail_loaded(self, timeout=15):

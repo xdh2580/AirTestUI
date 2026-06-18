@@ -286,13 +286,14 @@ class BasePage:
         assert item in container, msg or f"{item} 应在 {container} 中"
 
     # ==================== 工具方法 ====================
-
-    def _get_screen_size(self):
-        """获取当前设备屏幕分辨率 (宽, 高)"""
-        device = G.DEVICE
-        if device:
-            return device.get_current_resolution()
-        return 1080, 1920
+    @allure.step("点击返回箭头")
+    def click_back_arrow(self):
+        """点击返回箭头"""
+        from airtest.core.api import Template, touch, wait
+        log.info("点击返回箭头")
+        arrow_back = Template(self.resource_path("common/返回箭头.png"))
+        wait(arrow_back, timeout=5)
+        touch(arrow_back)
 
     @allure.step("重新进入小程序首页")
     def reload_miniapp(self):
@@ -311,6 +312,13 @@ class BasePage:
         wait(btn_reload, timeout=15)
         touch(btn_reload)
         self.wait_seconds(3)
+
+    def _get_screen_size(self):
+        """获取当前设备屏幕分辨率 (宽, 高)"""
+        device = G.DEVICE
+        if device:
+            return device.get_current_resolution()
+        return 1080, 1920
 
     @allure.step("等待: {seconds}秒")
     def wait_seconds(self, seconds: float = 1.0):
