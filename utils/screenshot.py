@@ -73,6 +73,40 @@ def attach_screenshot_to_allure(name: str = "screenshot", filepath: str = None):
         log.debug(f"截图已附加到 Allure: {name}")
 
 
+def image_diff_ratio(img1_path: str, img2_path: str) -> float:
+    """
+    计算两张图片的像素差异比例
+
+    Args:
+        img1_path: 变更前截图路径
+        img2_path: 变更后截图路径
+
+    Returns:
+        0.0 ~ 1.0，0 表示完全相同，1 表示完全不同
+    """
+    from PIL import Image
+    import numpy as np
+
+    img1 = Image.open(img1_path).convert("RGB")
+    img2 = Image.open(img2_path).convert("RGB")
+
+    if img1.size != img2.size:
+        log.warning(f"图片尺寸不一致: {img1.size} vs {img2.size}，缩放后对比")
+        img2 = img2.resize(img1.size)
+
+    arr1 = np.array(img1, dtype=np.float32)
+    arr2 = np.array(img2, dtype=np.float32)
+
+    # 任一 RGB 通道差值 > 30 的像素视为"发生了变化"
+    diff_mask = np.max(np.abs(arr1 - arr2), axis=2) > 30
+    diff_pixels = int(np.sum(diff_mask))
+    total_pixels = img1.size[0] * img1.size[1]
+
+    ratio = diff_pixels / total_pixels
+    log.info(f"图片差异比例: {ratio:.2%} ({diff_pixels}/{total_pixels})")
+    return ratio
+
+
 def screenshot_on_failure(func):
     """
     装饰器：函数执行失败时自动截图
