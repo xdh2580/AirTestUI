@@ -320,6 +320,106 @@ class BasePage:
             return device.get_current_resolution()
         return 1080, 1920
 
+    @allure.step("截取区域: ({x}, {y}, {w}x{h})")
+    def capture_area(self, x: int, y: int, w: int, h: int, name: str = "") -> str:
+        """
+        截取屏幕指定区域并保存为图片
+
+        Args:
+            x, y: 区域左上角坐标（像素）
+            w, h: 区域宽高（像素）
+            name: 截图名称，用于生成文件名
+
+        Returns:
+            截图文件绝对路径
+        """
+        import os
+        from PIL import Image
+
+        ts = int(time.time() * 1000)
+        # 截全屏 → 裁剪 → 删全屏临时图
+        full_path = str(ROOT_DIR / "screenshots" / f"_tmp_full_{ts}.png")
+        snapshot(full_path)
+
+        img = Image.open(full_path)
+        cropped = img.crop((x, y, x + w, y + h))
+
+        label = name or f"area_{x}_{y}_{w}_{h}"
+        crop_path = str(ROOT_DIR / "screenshots" / f"diff_{label}_{ts}.png")
+        cropped.save(crop_path)
+        log.info(f"区域截图已保存: {crop_path}")
+
+        try:
+            os.remove(full_path)
+        except OSError:
+            pass
+        return crop_path
+
+    @allure.step("对比两张图片差异")
+    def image_diff_ratio(self, img1_path: str, img2_path: str) -> float:
+        """
+        计算两张图片的像素差异比例
+
+        Args:
+            img1_path: 变更前截图路径
+            img2_path: 变更后截图路径
+
+        Returns:
+            0.0 ~ 1.0，0 表示完全相同，1 表示完全不同
+        """
+        from PIL import Image
+        import numpy as np
+
+        img1 = Image.open(img1_path).convert("RGB")
+        img2 = Image.open(img2_path).convert("RGB")
+
+        if img1.size != img2.size:
+            log.warning(f"图片尺寸不一致: {img1.size} vs {img2.size}，缩放后对比")
+            img2 = img2.resize(img1.size)
+
+        arr1 = np.array(img1, dtype=np.float32)
+        arr2 = np.array(img2, dtype=np.float32)
+
+        # 任一 RGB 通道差值 > 30 的像素视为"发生了变化"
+        diff_mask = np.max(np.abs(arr1 - arr2), axis=2) > 30
+        diff_pixels = int(np.sum(diff_mask))
+        total_pixels = img1.size[0] * img1.size[1]
+
+        ratio = diff_pixels / total_pixels
+        log.info(f"图片差异比例: {ratio:.2%} ({diff_pixels}/{total_pixels})")
+        return ratio
+
+    @allure.step("断言区域({x},{y},{w}x{h})发生变化")
+    def assert_area_changed(self, x: int, y: int, w: int, h: int, action,
+                            threshold: float = 0.10, msg: str = ""):
+        """
+        截取指定区域 → 执行 action → 再次截取 → 断言变化超过阈值
+
+        Args:
+            x, y, w, h: 截取区域
+            action:   无参可调用对象，执行触发变化的操作
+            threshold: 差异阈值（默认 10%）
+            msg:      断言失败时的提示信息
+        """
+        before = self.capture_area(x, y, w, h, name="before")
+        action()
+        self.wait_seconds(2)
+        after = self.capture_area(x, y, w, h, name="after")
+        diff = self.image_diff_ratio(before, after)
+
+        # 对比完清理截图，避免文件堆积
+        import os as _os
+        for p in (before, after):
+            try:
+                _os.remove(p)
+            except OSError:
+                pass
+
+        assert diff > threshold, (
+            msg or f"区域应发生变化，但差异仅 {diff:.1%}（阈值 {threshold:.0%}）"
+        )
+        log.info(f"区域变化断言通过: {diff:.1%} > {threshold:.0%}")
+
     @allure.step("等待: {seconds}秒")
     def wait_seconds(self, seconds: float = 1.0):
         """显式等待"""

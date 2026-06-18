@@ -65,8 +65,6 @@ class ShenkaHomePage(BasePage):
         #     self.resource_path(f"{RES}/shenka_home_carousel_moved.png"))
 
         # 权益文案按钮（用于 HOME-05）
-        # self.btn_rights = Template(
-        #     self.resource_path(f"{RES}/shenka_home_rights_btn.png"))
         self.rights_detail_indicator = Template(
             self.resource_path(f"{RES}/shenka_home_rights_detail.png"))
 
@@ -143,6 +141,15 @@ class ShenkaHomePage(BasePage):
         return self.is_exists(self.h5_page_indicator)
 
     # ---- 页面操作 ----
+    @allure.step("滑动到首页的筛选区域")
+    def swipe_to_filter_area(self):
+        """
+        滑动到首页的筛选区域
+        """
+        log.info("滑动到首页的筛选区域")
+        # 向上滑动两次
+        self.swipe_screen("up", duration=1.0)
+        self.swipe_screen("up", duration=1.0)
 
     @allure.step("点击附属卡Tab")
     def click_fushuka_tab(self):
