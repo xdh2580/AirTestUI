@@ -3,6 +3,7 @@
 管理 Android/iOS 设备的连接、断开和设备池，支持多设备并发
 """
 import threading
+from typing import Optional
 from airtest.core.api import connect_device, device as current_device
 from airtest.core.android.android import Android
 from airtest.core.ios.ios import IOS
@@ -161,7 +162,7 @@ class DriverManager:
                 device_info = self._allocated.pop(worker_id)
                 log.info(f"Worker-{worker_id} 释放设备: {device_info}")
 
-    def get_allocated_device(self, worker_id: int) -> DeviceInfo | None:
+    def get_allocated_device(self, worker_id: int) -> Optional[DeviceInfo]:
         """获取 worker 已分配的设备"""
         return self._allocated.get(worker_id)
 
