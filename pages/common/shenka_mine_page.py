@@ -1,44 +1,6 @@
 """
 我的申卡页面对象 - 纯图像识别
 对应模块: 我的申卡 (SKHG-MINE-01 ~ MINE-15)
-
-【资源缺失说明】
-已有图片（来自 myfirstscript，申请流程后期包含我的申卡相关操作）：
-  - shenka_mine_tab_indicator.png: 我的申卡Tab按钮（等待标志）
-  - shenka_mine_tab_btn.png: 我的申卡Tab（点击）
-  - shenka_mine_page_indicator.png: 我的申卡页面加载标志
-  - shenka_mine_btn_reward.png: 奖励明细入口
-  - shenka_mine_btn_activate.png: 在线激活入口
-  - shenka_mine_btn_collect_follow.png: 收藏关注入口
-  - shenka_mine_btn_wecom.png: 企微助手入口
-  - shenka_mine_btn_onekey_apply.png: 一键申卡入口
-  - shenka_mine_onekey_auth_page.png: 一键申卡授权页面标志
-  - shenka_mine_btn_onekey_start.png: 立即体验/授权同意按钮
-  - shenka_mine_option_btn.png: 选项类按钮（个人资料完善中，未在代码中引用）
-  - shenka_mine_btn_card_pk.png: 卡片PK入口
-  - shenka_mine_btn_profile.png: 个人资料入口
-  - shenka_mine_btn_generate_recommend.png: 生成推荐按钮
-  - shenka_mine_onekey_result_page.png: 推荐卡片页面标志（一键申卡结果）
-
-需补充（TODO_IMG）：
-  - 我的申卡Tab按钮（首页底部）(shenka_mine_tab.png)
-  - 奖励明细页面标志 (shenka_mine_reward_page.png)
-  - 激活页面标志 (shenka_mine_activate_page.png)
-  - 收藏关注页面标志 (shenka_mine_collect_page.png)
-  - 已收藏卡片条目（用于左滑操作）(shenka_mine_collect_item.png)
-  - 左滑后出现的取消收藏按钮 (shenka_mine_cancel_collect_btn.png)
-  - 取消收藏后空状态标志 (shenka_mine_collect_empty.png)
-  - 收藏页PK按钮（右上角）(shenka_mine_collect_pk_btn.png)
-  - 企微助手二维码页面标志 (shenka_mine_wecom_page.png)
-  - 一键申卡页面标志 (shenka_mine_onekey_page.png)
-  - 推荐结果中立即申请按钮 (shenka_mine_onekey_apply_btn.png)
-  - 卡片PK页面标志 (shenka_mine_pk_page.png)
-  - 个人资料页面标志 (shenka_mine_profile_page.png)
-  - 完善信息按钮 (shenka_mine_profile_edit_btn.png)
-  - 个人资料完善填写页面标志 (shenka_mine_profile_edit_page.png)
-  - 保存按钮 (shenka_mine_profile_save_btn.png)
-  - 保存成功标志 (shenka_mine_profile_saved.png)
-  - 快速申卡区域某卡片 (shenka_mine_quick_card_item.png)
 """
 import allure
 from airtest.core.api import Template
@@ -143,8 +105,8 @@ class ShenkaMinePage(BasePage):
         #     self.resource_path(f"{RES}/shenka_mine_activate_page.png"), threshold=0.8)
 
         # 收藏关注页面标志
-        # self.collect_page_indicator = Template(
-        #     self.resource_path(f"{RES}/shenka_mine_collect_page.png"), threshold=0.8)
+        self.collect_page_indicator = Template(
+            self.resource_path(f"{RES}/shenka_mine_collect_page_indicator.png"), threshold=0.8)
 
         # 已收藏卡片条目（用于左滑操作）
         # self.collect_item = Template(
@@ -199,6 +161,9 @@ class ShenkaMinePage(BasePage):
         #     self.resource_path(f"{RES}/shenka_mine_quick_card_item.png"), threshold=0.8)
 
     # ---- 页面验证 ----
+    @allure.step("判断我的收藏页是否已跳转")
+    def is_my_collect_page_displayed(self) -> bool:
+        return self.is_exists(self.collect_page_indicator)
 
     @allure.step("等待我的申卡页加载")
     def wait_mine_page_loaded(self, timeout=15):

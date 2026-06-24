@@ -1,22 +1,6 @@
 """
 申卡首页页面对象 - 纯图像识别
 对应模块: 首页 (SKHG-HOME-01 ~ HOME-07)
-
-【资源缺失说明】
-- 以下元素需要补充截图（标注 TODO_IMG）：
-  - 卡片轮播图区域 (shenka_home_carousel.png)
-  - 权益文案展开按钮 (shenka_home_rights_btn.png)
-  - 权益详情展开后的标志 (shenka_home_rights_detail.png)
-  - 申卡活动（云闪付专享券）文案按钮 (shenka_home_activity_btn.png)
-  - 申卡有礼展开标志 (shenka_home_activity_detail.png)
-  - 点击查看活动详情链接标志 (shenka_home_activity_link.png)
-  - 活动H5页面标志 (shenka_home_h5_page.png)
-  - 申请信用卡入口（云闪付小程序中） (yunshan_apply_entry.png)
-
-- 以下元素已有图片（来自 myfirstscript）：
-  - shenka_home_recommend_tab.png: 申卡首页推荐Tab（等待标志）
-  - shenka_home_recommend_tab_click.png: 申卡首页推荐Tab（点击）
-  - shenka_card_btn_apply_card.png: 下一个页面等待标志
 """
 import allure
 from airtest.core.api import Template
@@ -35,60 +19,48 @@ class ShenkaHomePage(BasePage):
     def __init__(self):
         super().__init__(poco=None)
 
-        # ---------- 已有图片资源 ----------
-        # 申卡首页推荐Tab(已选中状态) - 等待页面加载的锚点
+        # 申卡首页推荐Tab(已选中状态) 
         self.home_recommend_tab = Template(
             self.resource_path(f"{RES}/shenka_home_recommend_tab.png"))
-        # 申卡首页推荐Tab - 未选中状态
+        # 申卡首页推荐Tab(未选中状态)
         self.home_recommend_tab_click = Template(
-            self.resource_path(f"{RES}/shenka_home_recommend_tab_click.png"),)
+            self.resource_path(f"{RES}/shenka_home_recommend_tab_click.png"))
         # 立即申请按钮（申请流转入口）
         self.btn_apply_now = Template(
             self.resource_path(f"{RES}/shenka_home_btn_apply_now.png"))
         # 申请流程中三要素确认按钮（同意）
         self.btn_apply_confirm = Template(
             self.resource_path(f"{RES}/shenka_home_btn_apply_confirm.png"))
-
-        # ---------- 待补充图片资源（TODO_IMG） ----------
-        # 推荐/附属卡 Tab 切换标志（用于 HOME-02）
-        # self.tab_tuijian = Template(
-        #     self.resource_path(f"{RES}/shenka_home_recommend_tab.png"))
+        # 申卡首页附属卡Tab(未选中状态)
         self.tab_fushuka = Template(
             self.resource_path(f"{RES}/shenka_home_fushuka_tab.png"))
+        # 申卡首页附属卡Tab(已选中状态)
         self.tab_fushuka_selected = Template(
             self.resource_path(f"{RES}/shenka_home_fushuka_selected.png"))
-
-        # 轮播图区域（用于 HOME-04 滑动验证）
-        # self.carousel_area = Template(
-        #     self.resource_path(f"{RES}/shenka_home_carousel.png"))
-        # self.carousel_moved = Template(
-        #     self.resource_path(f"{RES}/shenka_home_carousel_moved.png"))
-
         # 权益文案按钮（用于 HOME-05）
         self.rights_detail_indicator = Template(
             self.resource_path(f"{RES}/shenka_home_rights_detail.png"))
-
         # 申卡活动文案按钮（用于 HOME-06/07）
         self.btn_activity = Template(
             self.resource_path(f"{RES}/shenka_home_activity_btn.png"))
+        # 申卡有礼展开标志
         self.activity_detail_indicator = Template(
             self.resource_path(f"{RES}/shenka_home_activity_detail.png"))
+        # 申卡有礼详情链接
         self.link_activity_detail = Template(
             self.resource_path(f"{RES}/shenka_home_activity_link.png"))
+        # 活动H5页面标志
         self.h5_page_indicator = Template(
             self.resource_path(f"{RES}/shenka_home_h5_page.png"))
-
-        # 申请信用卡入口（云闪付小程序中，用于 HOME-01）
-        # self.apply_entry_in_yunshansfu = Template(
-        #     self.resource_path(f"{RES}/yunshan_apply_entry.png"))
-
         # 选择城市入口
         self.select_city_entry = Template(
             self.resource_path(f"{RES}/shenka_home_select_city_entry.png"))
-
         # 搜索入口
         self.search_entry = Template(
             self.resource_path(f"{RES}/shenka_home_search_entry.png"))
+        # 任意一张卡片条目
+        self.any_card_item = Template(
+            self.resource_path(f"{RES}/shenka_home_any_card_item.png"))
             
 
     # ---- 页面验证 ----
@@ -150,6 +122,15 @@ class ShenkaHomePage(BasePage):
         # 向上滑动两次
         self.swipe_screen("up", duration=1.0)
         self.swipe_screen("up", duration=1.0)
+
+    @allure.step("点击首页卡片条目")
+    def click_card_item(self):
+        """
+        点击首页筛选区域中的任意一张卡片条目（进入详情页）
+        """
+        log.info("先下滑到筛选区域，再点击首页卡片条目")
+        self.swipe_to_filter_area()
+        self.click(self.any_card_item)
 
     @allure.step("点击附属卡Tab")
     def click_fushuka_tab(self):

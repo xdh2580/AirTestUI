@@ -286,6 +286,15 @@ class BasePage:
         assert item in container, msg or f"{item} 应在 {container} 中"
 
     # ==================== 工具方法 ====================
+    @allure.step("点击复选框")
+    def click_checkbox(self):
+        """点击复选框"""
+        from airtest.core.api import Template, touch, wait
+        log.info("点击复选框")
+        check_box = Template(self.resource_path("common/复选框.png"))
+        wait(check_box, timeout=5)
+        touch(check_box)
+
     @allure.step("点击返回箭头")
     def click_back_arrow(self):
         """点击返回箭头"""
