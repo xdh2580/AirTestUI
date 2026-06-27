@@ -15,6 +15,7 @@ from airtest.core.api import (
     assert_not_exists,
     sleep,
     snapshot,
+    Template,
 )
 from airtest.core.assertions import assert_equal, assert_not_equal
 from airtest.core.helper import G
@@ -286,19 +287,36 @@ class BasePage:
         assert item in container, msg or f"{item} 应在 {container} 中"
 
     # ==================== 工具方法 ====================
+    @allure.step("点击确定按钮")
+    def click_confirm_button(self):
+        """点击确定按钮"""
+        log.info("点击确定按钮")
+        btn_confirm_1 = Template(self.resource_path("common/确定_1.png"))
+        btn_confirm_2 = Template(self.resource_path("common/确认_1.png"))
+        # 有哪个点哪个（确认/确定）
+        btn_confirm = btn_confirm_1 if exists(btn_confirm_1) else btn_confirm_2
+        touch(btn_confirm)
+    @allure.step("点击取消按钮")
+    def click_cancel_button(self):
+        """点击取消按钮"""
+        log.info("点击取消按钮")
+        btn_cancel = Template(self.resource_path("common/取消_1.png"))
+        wait(btn_cancel, timeout=5)
+        touch(btn_cancel)
+        
     @allure.step("点击复选框")
     def click_checkbox(self):
         """点击复选框"""
-        from airtest.core.api import Template, touch, wait
         log.info("点击复选框")
-        check_box = Template(self.resource_path("common/复选框.png"))
-        wait(check_box, timeout=5)
+        check_box_1 = Template(self.resource_path("common/复选框.png"), threshold=0.7)
+        check_box_2 = Template(self.resource_path("common/复选框_2.png"), threshold=0.7)
+        # 两种尺寸复选框
+        check_box = check_box_1 if exists(check_box_1) else check_box_2
         touch(check_box)
 
     @allure.step("点击返回箭头")
     def click_back_arrow(self):
         """点击返回箭头"""
-        from airtest.core.api import Template, touch, wait
         log.info("点击返回箭头")
         arrow_back = Template(self.resource_path("common/返回箭头.png"))
         wait(arrow_back, timeout=5)
@@ -310,7 +328,6 @@ class BasePage:
         通过小程序菜单「重新进入」回到小程序首页。
         适用于任何页面需要回到首页的场景。
         """
-        from airtest.core.api import Template, touch, wait
         log.info("通过小程序菜单重新进入首页")
         btn_menu = Template(
             self.resource_path("common/小程序菜单.png"))

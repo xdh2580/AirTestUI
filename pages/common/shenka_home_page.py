@@ -61,6 +61,12 @@ class ShenkaHomePage(BasePage):
         # 任意一张卡片条目
         self.any_card_item = Template(
             self.resource_path(f"{RES}/shenka_home_any_card_item.png"))
+        # 我的申卡Tab（未选中状态）
+        self.mine_tab_unselected = Template(
+            self.resource_path(f"{RES}/shenka_home_mine_tab_unselected.png"))
+        # 我的申卡Tab（已选中状态）
+        self.mine_tab_selected = Template(
+            self.resource_path(f"{RES}/shenka_home_mine_tab_selected.png"))
             
 
     # ---- 页面验证 ----
@@ -214,3 +220,9 @@ class ShenkaHomePage(BasePage):
         log.info("点击搜索入口")
         self.wait_for_element(self.search_entry)
         self.click(self.search_entry)
+
+    @allure.step("点击我的申卡tab")
+    def click_mine_tab(self):
+        """点击我的申卡tab"""
+        log.info("点击我的申卡tab")
+        self.click(self.mine_tab_unselected)

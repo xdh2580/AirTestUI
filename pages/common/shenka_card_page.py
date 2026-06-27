@@ -140,9 +140,9 @@ class ShenkaCardPage(BasePage):
         """
         判断PK结果页是否已加载（滑到底部，通过两个去申请按钮判断）
         """
-        self.swipe_screen(direction="up")
-        self.swipe_screen(direction="up")
-        self.swipe_screen(direction="up")
+        # 向上滑动屏幕5次，保证能滑到底部
+        for _ in range(5):
+            self.swipe_screen(direction="up")
         return self.is_exists(self.pk_result_page_indicator)
 
     @allure.step("判断pk页点击去申请后，三要素确认页面是否出现")
